@@ -1,0 +1,64 @@
+# macOS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Xcode — gebruiker-specifieke staat (niet delen)
+xcuserdata/
+*.xcuserstate
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.xccheckout
+*.xcscmblueprint
+
+# Xcode — build output (wordt opnieuw gegenereerd)
+build/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+profile
+
+# Swift Package Manager — caches en lokale builds
+.build/
+Packages/
+Package.pins
+.swiftpm/
+# Let op: Package.resolved op project-rootniveau wél committen (zorgt voor reproduceerbare builds)
+
+# CocoaPods (mocht het ooit gebruikt worden)
+Pods/
+
+# Carthage (mocht het ooit gebruikt worden)
+Carthage/Build/
+
+# fastlane (mocht het ooit gebruikt worden)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Test artifacts
+*.xcresult
+
+# Secrets / lokale config — NOOIT committen
+.env
+.env.*
+!.env.example
+secrets/
+*.pem
+*.key
+*.p12
+*.p8
+
+# Logs
+*.log
