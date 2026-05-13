@@ -119,3 +119,31 @@ We werken met **feature-branches en pull requests**. Eénmalige uitzondering: de
 - Iedere taak vergt een paar extra git-stappen. Acceptabel in ruil voor de stabiliteit van `main`.
 - Cas moet elke PR akkoord geven voordat deze gemerged wordt — verlengt cycle time, maar past bij zijn rol als product owner.
 - We gebruiken **`gh` (GitHub CLI)** voor PR-aanmaak en -beheer vanuit de terminal — geïnstalleerd via Homebrew op 2026-04-30. Dat scheelt Cas handelingen in de browser.
+
+---
+
+## ADR-005 — Supabase-project in regio `eu-north-1` (Stockholm)
+
+**Datum:** 2026-05-13
+**Status:** geaccepteerd
+
+### Context
+Bij het aanmaken van het Supabase-project moet één regio worden gekozen. Die kan achteraf niet worden gewijzigd zonder data-migratie naar een nieuw project. Relevante regio's voor een Nederlands-gerichte iOS-app:
+- `eu-central-1` (Frankfurt)
+- `eu-west-1` (Ierland)
+- `eu-north-1` (Stockholm)
+- `us-east-1` (Virginia)
+
+### Beslissing
+Het project staat in **`eu-north-1` (Stockholm)** — gekozen door Cas bij projectaanmaak op 2026-05-13.
+
+### Argumenten
+- **GDPR.** Data van Nederlandse gebruikers binnen de EU bewaren is de eenvoudigste route om aan GDPR te voldoen — geen extra contractuele constructies (Standard Contractual Clauses, Data Privacy Framework) nodig zoals bij US-regio's.
+- **Latency.** Stockholm zit op ~30–50ms van Nederland — niet zo dichtbij als Frankfurt (~10–20ms), maar voor de huidige use-case (lees-/schrijfacties bij concertloggen, geen realtime gaming) ruim binnen de comfortzone.
+- **Beschikbaarheid.** AWS' `eu-north-1` is een volwaardige Supabase-regio met dezelfde features als de andere EU-regio's.
+- **Geen heroverweging nu.** Frankfurt zou marginaal sneller zijn geweest, maar het verschil is niet merkbaar voor de eindgebruiker. Een project-migratie nu zou tijd kosten zonder concreet voordeel.
+
+### Consequenties
+- Alle backend-data (gebruikers, attendances, foto's) blijft binnen de EU.
+- Bij eventuele uitbreiding naar Amerikaanse gebruikers (niet in roadmap) is regio-keuze geen blocker — Supabase ondersteunt later read-replicas in andere regio's.
+- Mocht latency vanuit Nederland ooit een probleem worden (onwaarschijnlijk bij deze app), migreren we naar `eu-central-1` met een nieuwe ADR.
