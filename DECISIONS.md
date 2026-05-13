@@ -147,3 +147,40 @@ Het project staat in **`eu-north-1` (Stockholm)** — gekozen door Cas bij proje
 - Alle backend-data (gebruikers, attendances, foto's) blijft binnen de EU.
 - Bij eventuele uitbreiding naar Amerikaanse gebruikers (niet in roadmap) is regio-keuze geen blocker — Supabase ondersteunt later read-replicas in andere regio's.
 - Mocht latency vanuit Nederland ooit een probleem worden (onwaarschijnlijk bij deze app), migreren we naar `eu-central-1` met een nieuwe ADR.
+
+---
+
+## ADR-006 — Authenticatie via e-mail + magic link, met `profiles`-tabel naast `auth.users`
+
+**Datum:** 2026-05-13
+**Status:** geaccepteerd
+
+### Context
+Het Supabase-project heeft een ingebouwde Auth-module die meerdere methodes aanbiedt: wachtwoord (e-mail + password), magic link (e-mail met inlog-knop), OTP per sms, en social providers (Google, Apple, GitHub, etc.). We moeten kiezen waarmee gebruikers inloggen en hoe we extra user-data (display name, Spotify-koppeling) opslaan — `auth.users` is namelijk Supabase-beheerd en niet uitbreidbaar.
+
+### Beslissing
+**Inlog:** e-mail + **magic link**. Geen wachtwoord. Apple Sign In houden we open voor vlak voor App Store-publicatie.
+
+**User-data:** aparte tabel `public.profiles` met `id` als foreign key naar `auth.users(id)`. Een database-trigger (`on_auth_user_created`) maakt automatisch een lege `profiles`-rij aan bij elke nieuwe signup.
+
+### Argumenten
+
+**Voor magic link:**
+- **Geen wachtwoord = minder frictie.** Cas' eerste testgroep (5 vrienden uit Fase 1) hoeft niets te onthouden of te resetten. Aanmelden = e-mailadres invullen, link in mail aanklikken, app opent automatisch.
+- **iOS heeft sterke universal-link-ondersteuning.** Een magic link uit Supabase opent de app rechtstreeks zonder browser-tussenstop.
+- **Geen wachtwoord = geen lekkage-risico bij hergebruik.** Testgebruikers gebruiken in praktijk hun e-mail-wachtwoord overal; een gestolen Concerten-wachtwoord zou ook elders schade doen.
+- **Apple Sign In is optioneel zolang we geen andere sociale login hebben.** App Store-regel: zodra Google/Facebook/etc. login wordt aangeboden, *moet* Apple Sign In ook. Bij magic-link-only kunnen we Apple Sign In rustig later toevoegen wanneer er gevraagd wordt naar "een klik om in te loggen".
+
+**Voor `profiles`-tabel:**
+- **`auth.users` is niet uitbreidbaar.** Supabase beheert die tabel zelf en upgrades kunnen kolommen toevoegen of verwijderen. Eigen velden erop plakken = riskant.
+- **Standaardpatroon in Supabase.** Bijna elke Supabase-app heeft een `public.profiles` (of `public.users`) met de extra kolommen. Documentatie en voorbeelden gaan ervan uit.
+- **RLS-scheiding.** Op `profiles` kunnen we eigen Row Level Security-policies zetten zonder `auth.users` te raken.
+- **Trigger zorgt voor consistentie.** `on_auth_user_created` maakt de `profiles`-rij in dezelfde transactie als de signup; geen "user zonder profiel"-edge cases.
+
+### Consequenties
+
+- **Geen wachtwoord-veld in de app.** Login-scherm vraagt alleen e-mail; gebruiker krijgt direct uitleg dat een link komt.
+- **E-mail-deliverability is belangrijk.** Supabase verstuurt magic-link-mails standaard via hun eigen SMTP — werkt voor MVP, maar mocht ooit een mail in de spam belanden bij een testgebruiker, dan koppelen we onze eigen SMTP (bijvoorbeeld Resend of Mailgun) aan Supabase Auth.
+- **Universal links moeten correct geconfigureerd worden.** Vereist Apple Developer-enrollment om de Associated Domains-capability aan te zetten. Daarvoor: tijdelijke fallback naar "open de link in Safari, daarna handmatig terug naar de app" totdat Apple Developer is geregeld. Voor nu (alleen in simulator) niet kritiek.
+- **`profiles`-trigger draait `security definer`** — dat omzeilt RLS bij de insert. Dat moet zo, anders kan een net aangemaakte gebruiker zijn eigen rij niet toevoegen. Geen INSERT-policy nodig op `profiles` vanuit clients.
+- **Apple Sign In als toekomstige uitbreiding:** ADR opnieuw bekijken zodra Apple Developer-enrollment loopt en we serieus richting App Store gaan.

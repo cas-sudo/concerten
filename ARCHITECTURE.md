@@ -29,11 +29,12 @@
 
 > Tabellen worden aangemaakt in Supabase wanneer we het project opzetten. Veldnamen zijn voorstellen — definitieve schema's komen in migratiebestanden.
 
-### `users`
-Gebruiker van de app. Wordt aangemaakt door Supabase Auth.
-- `id` (uuid, primary key) — gegenereerd door Supabase Auth
-- `email` (text)
-- `display_name` (text)
+### `auth.users` (Supabase-beheerd) + `public.profiles`
+Supabase Auth beheert zelf de tabel `auth.users` met `id`, `email`, `created_at` etc. Daar mag je geen kolommen aan toevoegen. Voor extra user-data houden we een eigen tabel `public.profiles` aan met dezelfde `id` als foreign key naar `auth.users(id)`. Een database-trigger maakt automatisch een `profiles`-rij aan zodra er een nieuwe gebruiker in `auth.users` verschijnt.
+
+**`public.profiles`:**
+- `id` (uuid, primary key) — gelijk aan `auth.users.id`
+- `display_name` (text, nullable)
 - `spotify_user_id` (text, nullable) — koppeling met Spotify-account voor luistergedrag
 - `created_at` (timestamp)
 
@@ -84,7 +85,7 @@ De volgorde van nummers tijdens een specifiek concert.
 ### `attendances`
 "Ik was bij dit concert." Centrale tabel voor de logboek-feature.
 - `id` (uuid, primary key)
-- `user_id` (uuid, foreign key → `users.id`)
+- `user_id` (uuid, foreign key → `auth.users.id`)
 - `concert_id` (uuid, foreign key → `concerts.id`)
 - `rating_performance` (integer 1–10, nullable)
 - `rating_sound` (integer 1–10, nullable)
@@ -127,7 +128,24 @@ Vriendschap tussen twee gebruikers. Pas actief vanaf Fase 3 — schema vast neer
 
 > Definitieve flow wordt vastgesteld wanneer we Supabase opzetten in een latere sessie.
 
-**Voorlopige aanname:** Supabase Auth met **e-mail + magic link**. Reden: Cas' testgebruikers hoeven geen wachtwoord te onthouden, en een magic link werkt op iOS soepel via universal links. Apple Sign In overwegen we vlak voor App Store-publicatie (Apple verplicht het wanneer er sociale login is, maar bij magic-link-only kan het optioneel blijven).
+**Definitieve flow (vanaf 2026-05-13, zie ADR-006):** Supabase Auth met **e-mail + magic link**. Geen wachtwoord. Apple Sign In overwegen we vlak voor App Store-publicatie (Apple verplicht het zodra er sociale login is, maar bij magic-link-only blijft het optioneel).
+
+---
+
+## Secrets en configuratie
+
+**Drie soorten "geheimen" rond Supabase, met elk hun eigen plek:**
+
+| Wat | Mag in repo? | Mag in chat? | Waar opgeslagen |
+|---|---|---|---|
+| **Project URL** (`https://<ref>.supabase.co`) | Ja | Ja | `Concerten/Concerten/Config.swift` (ingecheckt) |
+| **`anon public` key** | Ja | Ja | `Concerten/Concerten/Config.swift` (ingecheckt) |
+| **Database wachtwoord** | Nee | Nee | Cas' wachtwoordmanager |
+| **`service_role` key** | Nee | Nee | Alleen op de server (later Edge Functions / Supabase dashboard) |
+
+**Waarom mogen URL en anon key in de repo?** De anon key is by design publiek. Zodra de iOS-app op een telefoon staat, kun je hem uit de binary halen — dat is geen aanvalsvector die we proberen tegen te houden. De data wordt beschermd door **Row Level Security** op de database (regels die zeggen "alleen rijen waar `auth.uid() = user_id`"). De `service_role` key omzeilt RLS volledig — die mag dus nooit in de client of in de repo.
+
+**Wanneer dit pijn gaat doen:** zodra de repo publiek wordt (open-source), is het netter om de anon key naar een `xcconfig`-bestand te verplaatsen dat per omgeving wisselt (staging vs productie). Voor nu — privé-repo, één project — is hardcoden in `Config.swift` de eenvoudigste route. Bij open-sourcing een nieuwe ADR.
 
 ---
 
