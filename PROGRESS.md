@@ -4,6 +4,52 @@
 
 ---
 
+## 2026-05-13 — Sessie 4: Fase 0 / Stap 6 — Supabase-fundering staat
+
+**Wat gedaan:**
+- Sessiestart-protocol gevolgd (`CLAUDE.md` + laatste PROGRESS-entries + relevante stukken `ARCHITECTURE.md` gelezen).
+- Cas heeft een Supabase-account aangemaakt en een project in regio **`eu-north-1` (Stockholm)** opgezet. Project-URL en `anon public` key gedeeld in chat.
+- Werk verdeeld over twee feature-branches en twee PR's, voor leesbaarheid:
+
+**PR #4 — Sessie 4 (1/2): datamodel** — branch `feature/supabase-foundation`, gemerged (commit `b37e04e`):
+- ADR-005: regio-keuze `eu-north-1` (Stockholm) vastgelegd — EU = GDPR-OK, latency naar NL acceptabel.
+- Migratie `supabase/migrations/0001_initial_schema.sql` met vijf kern-tabellen + RLS:
+  - `profiles` (extra user-data bovenop `auth.users`, via trigger automatisch aangemaakt bij signup)
+  - `artists`, `venues`, `concerts` (lookup-tabellen, alleen leesbaar voor clients)
+  - `attendances` (eigen-data per gebruiker — SELECT/INSERT/UPDATE/DELETE alleen op rijen waar `auth.uid() = user_id`)
+- SQL succesvol uitgevoerd door Cas in de Supabase SQL Editor ("Success. No rows returned." + 5 tabellen zichtbaar in Table Editor).
+
+**PR #5 — Sessie 4 (2/2): Swift SDK + auth-flow** — branch `feature/supabase-swift-sdk`:
+- ADR-006: authenticatie via **e-mail + magic link** definitief vastgelegd; uitleg `profiles`-tabel naast `auth.users` formaliseert het patroon dat in PR #4 al was toegepast.
+- `ARCHITECTURE.md` bijgewerkt: `users` → `auth.users` + `public.profiles`; nieuwe sectie "Secrets en configuratie" met een tabel die per geheim toelicht waar het mag staan (URL + anon key mogen in repo, database-wachtwoord en service_role key absoluut niet).
+- Supabase Swift SDK (`supabase-swift` v2.46.0) toegevoegd via Swift Package Manager — handmatige edit van `project.pbxproj` met aparte UUID-prefix (`C001…`) voor herkenbaarheid. SPM heeft 7 packages opgehaald (Supabase + 6 transitieve deps van pointfreeco en Apple).
+- `Concerten/Concerten/Config.swift` aangemaakt — bevat de project-URL en anon key. Hardcoded en ingecheckt; bewust géén `.env`-of-`xcconfig`-omweg voor MVP (anon key is by design publiek; RLS beschermt de data).
+- `Concerten/Concerten/SupabaseClient.swift` aangemaakt — `enum SupabaseService` met een lazy `static let shared` Supabase-client. Wordt nog nergens aangeroepen; eerste call site komt in een volgende sessie.
+- Build geverifieerd via `xcodebuild` met de SDK erin: `** BUILD SUCCEEDED **`, geen warnings in onze code.
+
+**Bestanden aangemaakt/gewijzigd:**
+- `DECISIONS.md` (ADR-005, ADR-006 toegevoegd)
+- `ARCHITECTURE.md` (`users` → `profiles`, nieuwe sectie "Secrets en configuratie", auth-flow definitief)
+- `supabase/migrations/0001_initial_schema.sql` (nieuwe submap + bestand)
+- `Concerten/Concerten/Config.swift` (nieuw)
+- `Concerten/Concerten/SupabaseClient.swift` (nieuw)
+- `Concerten/Concerten.xcodeproj/project.pbxproj` (SDK + bestanden geregistreerd)
+- `PROGRESS.md` (deze entry)
+
+**Openstaande vragen / acties:**
+- **Cas:** database-wachtwoord veilig opslaan in eigen wachtwoordmanager — eenmalig, klaar zodra dat is gebeurd. (Niet in chat, niet in repo.)
+- **Cas + ik:** Apple Developer Program-enrollment ($99/jaar) — alleen wanneer we naar TestFlight willen, niet nu. Wel relevant voor universal links bij de magic-link-flow op een fysiek device; voor simulator-testen niet nodig.
+- **Setlist.fm en Spotify API-keys** — registreren wanneer we de externe data daadwerkelijk gaan ophalen (volgende fase).
+
+**Volgende sessie (Sessie 5 — Stap 7: eerste auth- en leesflow):**
+- Eerste minimale gebruikersflow in de app:
+  1. Login-scherm dat e-mail vraagt en een magic link verstuurt via `SupabaseService.shared.auth.signInWithOTP(email:)`.
+  2. Universal-link-handling (binnen mogelijkheden zonder Apple Developer — eerst alleen "kopieer de code uit de mail" als tussenoplossing, of testen via Supabase' "Open in app"-knop in simulator).
+  3. Lege "Mijn concerten"-lijst die uit `attendances` leest (nog leeg, dus toont een nette empty state).
+- Daarna eerst écht een concert kunnen loggen (Stap 8) — vereist Setlist.fm-integratie voor het opzoeken van artiest/venue.
+
+---
+
 ## 2026-05-12 — Sessie 3: Fase 0 / Stap 5b — app draait in iOS Simulator
 
 **Wat gedaan:**

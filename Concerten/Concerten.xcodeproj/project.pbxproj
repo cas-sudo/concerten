@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C001000000000000000000B1 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = C001000000000000000000A1 /* Config.swift */; };
+		C001000000000000000000B2 /* SupabaseClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = C001000000000000000000A2 /* SupabaseClient.swift */; };
+		C001000000000000000000E1 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = C001000000000000000000D1 /* Supabase */; };
 		E141C34E2FB35D290055D994 /* ConcertenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E141C34D2FB35D290055D994 /* ConcertenApp.swift */; };
 		E141C3502FB35D290055D994 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E141C34F2FB35D290055D994 /* ContentView.swift */; };
 		E141C3522FB35D2B0055D994 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E141C3512FB35D2B0055D994 /* Assets.xcassets */; };
@@ -34,6 +37,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C001000000000000000000A1 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		C001000000000000000000A2 /* SupabaseClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseClient.swift; sourceTree = "<group>"; };
 		E141C34A2FB35D290055D994 /* Concerten.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Concerten.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E141C34D2FB35D290055D994 /* ConcertenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConcertenApp.swift; sourceTree = "<group>"; };
 		E141C34F2FB35D290055D994 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -51,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C001000000000000000000E1 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +102,8 @@
 			children = (
 				E141C34D2FB35D290055D994 /* ConcertenApp.swift */,
 				E141C34F2FB35D290055D994 /* ContentView.swift */,
+				C001000000000000000000A1 /* Config.swift */,
+				C001000000000000000000A2 /* SupabaseClient.swift */,
 				E141C3512FB35D2B0055D994 /* Assets.xcassets */,
 				E141C3532FB35D2B0055D994 /* Preview Content */,
 			);
@@ -143,6 +151,9 @@
 			dependencies = (
 			);
 			name = Concerten;
+			packageProductDependencies = (
+				C001000000000000000000D1 /* Supabase */,
+			);
 			productName = Concerten;
 			productReference = E141C34A2FB35D290055D994 /* Concerten.app */;
 			productType = "com.apple.product-type.application";
@@ -215,6 +226,9 @@
 				Base,
 			);
 			mainGroup = E141C3412FB35D290055D994;
+			packageReferences = (
+				C001000000000000000000C1 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			productRefGroup = E141C34B2FB35D290055D994 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -259,6 +273,8 @@
 			files = (
 				E141C3502FB35D290055D994 /* ContentView.swift in Sources */,
 				E141C34E2FB35D290055D994 /* ConcertenApp.swift in Sources */,
+				C001000000000000000000B1 /* Config.swift in Sources */,
+				C001000000000000000000B2 /* SupabaseClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -582,6 +598,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C001000000000000000000C1 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.46.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C001000000000000000000D1 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C001000000000000000000C1 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E141C3422FB35D290055D994 /* Project object */;
 }
