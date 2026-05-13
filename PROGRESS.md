@@ -4,6 +4,43 @@
 
 ---
 
+## 2026-05-12 — Sessie 3: Fase 0 / Stap 5b — app draait in iOS Simulator
+
+**Wat gedaan:**
+- Sessiestart-protocol gevolgd (`CLAUDE.md` + laatste PROGRESS-entries + relevante delen van `ARCHITECTURE.md` gelezen).
+- Openstaand punt uit Sessie 2 geverifieerd: iOS Simulator-runtime is in de tussentijd geïnstalleerd. `xcrun simctl list runtimes` toont `iOS 17.5 (17.5 - 21F79)`. Xcode 15.4 actief.
+- Feature-branch aangemaakt: `chore/run-app-in-simulator` (worktree-branch hernoemd naar deze conventie).
+- Doel-simulator gekozen: **iPhone 15 (iOS 17.5)** — modern, gangbaar, matcht ADR-001 (iOS 17+).
+- Build uitgevoerd vanaf de command line:
+  - `xcodebuild -project Concerten.xcodeproj -scheme Concerten -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' -derivedDataPath ./build clean build`
+  - Resultaat: **`** BUILD SUCCEEDED **`** zonder warnings of errors.
+- Simulator gebooot via `xcrun simctl boot "iPhone 15"`; Simulator.app geopend.
+- App geïnstalleerd en gestart:
+  - `xcrun simctl install booted "<path>/Concerten.app"`
+  - `xcrun simctl launch booted nl.casdenbraber.Concerten` → PID 31490.
+- **Resultaat zichtbaar in de simulator: standaard SwiftUI Hello-scherm met een blauw globe-symbool en de tekst "Hello, world!"** Definition of Done van Stap 5b gehaald.
+- `derivedDataPath ./build` is bewust binnen de submap `Concerten/` gezet zodat alle build-artifacts onder één map vallen die al door `.gitignore` wordt genegeerd. Geen wijzigingen aan de app-code zelf.
+
+**Bestanden aangemaakt/gewijzigd:**
+- `PROGRESS.md` (deze entry).
+- *Geen wijzigingen aan de app-code, het Xcode-project of overige documentatie.*
+- Build-artefacten in `Concerten/build/` (niet onder versiebeheer).
+
+**Openstaande vragen / acties:**
+- **Fysieke iPhone:** nog niet geprobeerd. Vereist Apple Developer-setup (Personal Team kan zonder $99-enrollment voor lokaal testen). Beslissen of we dit nog in Fase 0 doen, of bewaren tot vlak voor TestFlight.
+- **Cas:** Supabase-account aanmaken — gebeurt samen in Stap 6.
+- **Cas + ik:** Apple Developer Program-enrollment ($99/jaar) — alleen wanneer we naar TestFlight willen, niet nu.
+- **Architectuur:** authenticatieflow definitief vaststellen wanneer we Supabase opzetten (huidige aanname: e-mail + magic link).
+
+**Volgende sessie (Sessie 4 — Stap 6: Supabase-fundering):**
+- Samen met Cas een Supabase-account aanmaken en een project opzetten (regio EU).
+- Eerste tabellen aanmaken op basis van het datamodel in `ARCHITECTURE.md` (waarschijnlijk eerst `users`, `artists`, `venues`, `concerts`).
+- Supabase Swift SDK toevoegen aan het Xcode-project via Swift Package Manager.
+- Definitieve authenticatie-keuze maken (magic link bevestigen of bijstellen) en als ADR-005 vastleggen.
+- Eerste schermflow: lege "Mijn concerten"-lijst die uit Supabase leest (nog zonder schrijven).
+
+---
+
 ## 2026-05-12 — Sessie 2: Fase 0 / Stap 5 — Xcode-project staat, eerste PR-cyclus voltooid
 
 **Wat gedaan:**
